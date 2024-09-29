@@ -223,10 +223,10 @@ function processPing() {
         console.log('Detected Frequencies:', frequencies);
 
         // Identify Coin
-        const { name: guessedCoin, matchingFrequencies } = identifyCoin(frequencies);
+        const { name: guessedCoin, matchingFrequencies, confidence } = identifyCoin(frequencies);
 
         // Update Log
-        updateLog(frequencies, guessedCoin);
+        updateLog(frequencies, guessedCoin, confidence);
 
         // Highlight detected frequencies on the chart
         highlightFrequencies(frequencies, matchingFrequencies);
@@ -280,9 +280,12 @@ function getFrequencies(frequencyData) {
 
 // Function to identify the coin based on frequencies
 function identifyCoin(frequencies) {
+    let bestMatch = { name: "Unknown Coin", matchingFrequencies: [], confidence: 0 };
+
     for (let coin of knownCoins) {
         let matchCount = 0;
         let matchingFrequencies = [];
+        let totalRanges = coin.frequencyRanges.length;
 
         // Iterate through the coin's frequency ranges
         for (let range of coin.frequencyRanges) {
@@ -304,18 +307,20 @@ function identifyCoin(frequencies) {
             }
         }
 
-        // If all ranges for the coin are matched, it's a valid coin
-        if (matchCount === coin.frequencyRanges.length) {
-            return { name: coin.name, matchingFrequencies };
+        // Calculate confidence as the ratio of matched ranges to total ranges
+        const confidence = (matchCount / totalRanges) * 100;
+
+        // If this coin has a higher confidence than the current best match, update the best match
+        if (confidence > bestMatch.confidence) {
+            bestMatch = { name: coin.name, matchingFrequencies, confidence };
         }
     }
 
-    // If no coin matches, return "Unknown Coin" and an empty array
-    return { name: "Unknown Coin", matchingFrequencies: [] };
+    return bestMatch;
 }
 
 // Function to update the detection log
-function updateLog(frequencies, guessedCoin) {
+function updateLog(frequencies, guessedCoin, confidence) {
     const time = new Date().toLocaleTimeString();
     const freqString = frequencies.map(f => `${f.frequency.toFixed(0)} Hz (Amp: ${f.amplitude})`).join(', ');
 
@@ -324,6 +329,7 @@ function updateLog(frequencies, guessedCoin) {
         <td>${time}</td>
         <td>${freqString}</td>
         <td>${guessedCoin}</td>
+        <td>${confidence.toFixed(2)}%</td>
     `;
 
     logBody.prepend(newRow);
