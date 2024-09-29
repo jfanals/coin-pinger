@@ -45,11 +45,11 @@ const chart = new Chart(ctx, {
             label: 'Detected Frequencies',
             data: [],
             type: 'bar',
-            backgroundColor: 'rgba(0, 255, 0, 0.7)', // Semi-transparent green
-            borderColor: 'rgba(0, 255, 0, 1)', // Solid green border
+            backgroundColor: 'rgba(0, 255, 0, 1)', // Semi-transparent dark green
+            borderColor: 'rgba(0, 255, 0, 1)', // Solid dark green border
             borderWidth: 2,
             barPercentage: 50,
-            // categoryPercentage: 1,
+            barThickness: 5,
         }, {
             label: 'Non-Matching Frequencies',
             data: [],
@@ -58,13 +58,20 @@ const chart = new Chart(ctx, {
             borderColor: 'rgba(255, 0, 0, 1)', // Solid red border
             borderWidth: 2,
             barPercentage: 50,
-            // categoryPercentage: 1,
+            barThickness: 5,
         }, {
             label: 'Amplitude',
             data: [], // Amplitudes
             backgroundColor: 'rgba(0, 123, 255, 0.5)',
             barPercentage: 50,
-            // categoryPercentage: 0.8
+        }, {
+            label: 'Detected Coin Range',
+            data: [],
+            type: 'bar',
+            backgroundColor: 'rgba(0, 255, 0, 0.05)', // Semi-transparent light green
+            borderColor: 'rgba(0, 255, 0, 0.05)', // Solid light green border
+            borderWidth: 2,
+            barPercentage: 50,
         }]
     },
     options: {
@@ -81,7 +88,7 @@ const chart = new Chart(ctx, {
                 ticks: {
                     stepSize: 1000
                 },
-                stacked: true
+                stacked: false
             },
             y: {
                 beginAtZero: true,
@@ -89,7 +96,7 @@ const chart = new Chart(ctx, {
                     display: true,
                     text: 'Amplitude'
                 },
-                stacked: true
+                stacked: false
             }
         },
         plugins: {
@@ -229,7 +236,7 @@ function processPing() {
         updateLog(frequencies, guessedCoin, confidence);
 
         // Highlight detected frequencies on the chart
-        highlightFrequencies(frequencies, matchingFrequencies);
+        highlightFrequencies(frequencies, matchingFrequencies, guessedCoin);
 
         // Reset flags
         pingDetected = false;
@@ -363,12 +370,13 @@ function updateChart() {
 }
 
 // Function to highlight detected frequencies on the chart
-function highlightFrequencies(frequencies, matchingFrequencies) {
+function highlightFrequencies(frequencies, matchingFrequencies, guessedCoin) {
     console.log('Highlighting frequencies:', frequencies);
     
     // Prepare data for the detected frequencies bars
     const detectedFreqData = new Array(chart.data.labels.length).fill(null);
     const nonMatchingFreqData = new Array(chart.data.labels.length).fill(null);
+    const coinRangeData = new Array(chart.data.labels.length).fill(null);
     
     frequencies.forEach(freq => {
         if (freq.frequency >= 4000 && freq.frequency <= 20000) {
@@ -384,11 +392,29 @@ function highlightFrequencies(frequencies, matchingFrequencies) {
         }
     });
 
+    // Highlight the detected coin's frequency range
+    const detectedCoin = knownCoins.find(coin => coin.name === guessedCoin);
+    if (detectedCoin) {
+        detectedCoin.frequencyRanges.forEach(range => {
+            const tolerance = (range.max - range.min) * (detectedCoin.tolerancePercent / 100);
+            const adjustedMin = range.min - tolerance;
+            const adjustedMax = range.max + tolerance;
+            chart.data.labels.forEach((label, index) => {
+                const freq = parseFloat(label);
+                if (freq >= adjustedMin && freq <= adjustedMax) {
+                    coinRangeData[index] = Math.max(...frequencyDataArray); // Set to max amplitude
+                }
+            });
+        });
+    }
+
     // Update the chart data
     console.log('Detected Frequencies Data:', detectedFreqData);
     console.log('Non-Matching Frequencies Data:', nonMatchingFreqData);
+    console.log('Coin Range Data:', coinRangeData);
     chart.data.datasets[0].data = detectedFreqData;
     chart.data.datasets[1].data = nonMatchingFreqData;
+    chart.data.datasets[3].data = coinRangeData;
 
     // Update the chart without animation
     chart.update('none');
