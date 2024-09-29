@@ -45,6 +45,15 @@ const chart = new Chart(ctx, {
             label: 'Detected Frequencies',
             data: [],
             type: 'bar',
+            backgroundColor: 'rgba(0, 255, 0, 0.7)', // Semi-transparent green
+            borderColor: 'rgba(0, 255, 0, 1)', // Solid green border
+            borderWidth: 2,
+            barPercentage: 50,
+            // categoryPercentage: 1,
+        }, {
+            label: 'Non-Matching Frequencies',
+            data: [],
+            type: 'bar',
             backgroundColor: 'rgba(255, 0, 0, 0.7)', // Semi-transparent red
             borderColor: 'rgba(255, 0, 0, 1)', // Solid red border
             borderWidth: 2,
@@ -214,13 +223,13 @@ function processPing() {
         console.log('Detected Frequencies:', frequencies);
 
         // Identify Coin
-        const guessedCoin = identifyCoin(frequencies);
+        const { name: guessedCoin, matchingFrequencies } = identifyCoin(frequencies);
 
         // Update Log
         updateLog(frequencies, guessedCoin);
 
         // Highlight detected frequencies on the chart
-        highlightFrequencies(frequencies);
+        highlightFrequencies(frequencies, matchingFrequencies);
 
         // Reset flags
         pingDetected = false;
@@ -273,6 +282,7 @@ function getFrequencies(frequencyData) {
 function identifyCoin(frequencies) {
     for (let coin of knownCoins) {
         let matchCount = 0;
+        let matchingFrequencies = [];
 
         // Iterate through the coin's frequency ranges
         for (let range of coin.frequencyRanges) {
@@ -281,7 +291,13 @@ function identifyCoin(frequencies) {
             const adjustedMax = range.max + tolerance;
 
             // Check if any of the detected frequencies fall within the tolerance range for this range
-            const isInRange = frequencies.some(freq => freq.frequency >= adjustedMin && freq.frequency <= adjustedMax);
+            const isInRange = frequencies.some(freq => {
+                const inRange = freq.frequency >= adjustedMin && freq.frequency <= adjustedMax;
+                if (inRange) {
+                    matchingFrequencies.push(freq);
+                }
+                return inRange;
+            });
 
             if (isInRange) {
                 matchCount++;
@@ -290,12 +306,12 @@ function identifyCoin(frequencies) {
 
         // If all ranges for the coin are matched, it's a valid coin
         if (matchCount === coin.frequencyRanges.length) {
-            return coin.name;
+            return { name: coin.name, matchingFrequencies };
         }
     }
 
-    // If no coin matches, return "Unknown Coin"
-    return "Unknown Coin";
+    // If no coin matches, return "Unknown Coin" and an empty array
+    return { name: "Unknown Coin", matchingFrequencies: [] };
 }
 
 // Function to update the detection log
@@ -336,30 +352,37 @@ function updateChart() {
     }
 
     chart.data.labels = filteredLabels;
-    chart.data.datasets[1].data = filteredData;
+    chart.data.datasets[2].data = filteredData;
     chart.update();
 }
 
 // Function to highlight detected frequencies on the chart
-function highlightFrequencies(frequencies) {
+function highlightFrequencies(frequencies, matchingFrequencies) {
     console.log('Highlighting frequencies:', frequencies);
     
     // Prepare data for the detected frequencies bars
     const detectedFreqData = new Array(chart.data.labels.length).fill(null);
+    const nonMatchingFreqData = new Array(chart.data.labels.length).fill(null);
     
     frequencies.forEach(freq => {
         if (freq.frequency >= 4000 && freq.frequency <= 20000) {
             // Find the closest label index
             const index = chart.data.labels.findIndex(label => parseFloat(label) >= freq.frequency);
             if (index !== -1) {
-                detectedFreqData[index] = freq.amplitude;
+                if (matchingFrequencies.some(mf => mf.frequency === freq.frequency)) {
+                    detectedFreqData[index] = freq.amplitude;
+                } else {
+                    nonMatchingFreqData[index] = freq.amplitude;
+                }
             }
         }
     });
 
     // Update the chart data
     console.log('Detected Frequencies Data:', detectedFreqData);
+    console.log('Non-Matching Frequencies Data:', nonMatchingFreqData);
     chart.data.datasets[0].data = detectedFreqData;
+    chart.data.datasets[1].data = nonMatchingFreqData;
 
     // Update the chart without animation
     chart.update('none');
