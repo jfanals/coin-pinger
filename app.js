@@ -170,7 +170,7 @@ function stopAnalysis() {
         audioContext.close();
     }
     chart.data.datasets[0].data = []; // Clear detected frequencies
-    chart.update();
+    chart.update('none');
 }
 
 // Initialize Chart Labels
@@ -245,7 +245,7 @@ function processPing() {
             cooldown = false;
         }, 1000); // 1 second cooldown
 
-    }, 400); // Wait 0.5 seconds to collect the sound
+    }, 200); // Wait 0.5 seconds to collect the sound
 }
 
 // Function to get significant frequencies using peak detection
@@ -362,7 +362,7 @@ function updateChart() {
 
     chart.data.labels = filteredLabels;
     chart.data.datasets[2].data = filteredData;
-    chart.update();
+    chart.update('none');
 }
 
 // Function to highlight detected frequencies on the chart
