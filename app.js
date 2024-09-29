@@ -3,16 +3,16 @@ const knownCoins = [
     { 
         name: "Sovereign", 
         frequencies: [
-            { value: 5500, tolerancePercent: 5 },
-            { value: 12500, tolerancePercent: 3 }
+            { value: 5600, tolerancePercent: 5 },
+            { value: 12700, tolerancePercent: 5 }
         ]
     },
     { 
         name: "Krugerrand", 
         frequencies: [
             { value: 4900, tolerancePercent: 5 },
-            { value: 10915, tolerancePercent: 3 },
-            { value: 18500, tolerancePercent: 3 }
+            { value: 10915, tolerancePercent: 5 },
+            { value: 18500, tolerancePercent: 5 }
         ]
     },
     // Add more coins here as needed
@@ -192,18 +192,20 @@ let pingDetected = false;
 let cooldown = false;
 
 function detectPing() {
-    analyser.getByteTimeDomainData(dataArray);
-    let sum = 0;
-    for (let i = 0; i < dataArray.length; i++) {
-        sum += Math.abs(dataArray[i] - 128);
-    }
-    let average = sum / dataArray.length;
+    analyser.getByteFrequencyData(frequencyDataArray);
+    let pingDetected = false;
 
-    // Simple threshold for detecting a ping
-    if (average > 0.7 && !pingDetected && !cooldown) {
+    // Check if any frequency has an amplitude above 100
+    for (let i = 0; i < frequencyDataArray.length; i++) {
+        if (frequencyDataArray[i] > 100) {
+            pingDetected = true;
+            break;
+        }
+    }
+
+    if (pingDetected && !cooldown) {
+        cooldown = true;
         chart.data.datasets[0].data = [];
-        console.log('Ping detected');
-        pingDetected = true;
         statusIndicator.textContent = 'Status: Ping Detected - Processing...';
         statusIndicator.style.color = 'orange';
         processPing();
@@ -216,7 +218,6 @@ function detectPing() {
 }
 
 function processPing() {
-    console.log('Processing ping...');
     // Brief cooldown to collect the entire sound event
     setTimeout(() => {
         analyser.getByteFrequencyData(frequencyDataArray);
@@ -224,7 +225,6 @@ function processPing() {
         // Extract frequencies
         const frequencies = getFrequencies(frequencyDataArray);
 
-        console.log('Detected Frequencies:', frequencies);
 
         // Identify Coin
         const { name: guessedCoin, matchingFrequencies, confidence } = identifyCoin(frequencies);
@@ -237,14 +237,13 @@ function processPing() {
 
         // Reset flags
         pingDetected = false;
-        cooldown = true;
         statusIndicator.textContent = 'Status: Listening...';
         statusIndicator.style.color = 'green';
 
         // Cooldown period
         setTimeout(() => {
             cooldown = false;
-        }, 2000); // 1 second cooldown
+        }, 1000); // 1 second cooldown
 
     }, 400); // Wait 0.5 seconds to collect the sound
 }
@@ -368,7 +367,6 @@ function updateChart() {
 
 // Function to highlight detected frequencies on the chart
 function highlightFrequencies(frequencies, matchingFrequencies, guessedCoin) {
-    console.log('Highlighting frequencies:', frequencies);
     
     // Prepare data for the detected frequencies bars
     const detectedFreqData = new Array(chart.data.labels.length).fill(null);
@@ -406,9 +404,6 @@ function highlightFrequencies(frequencies, matchingFrequencies, guessedCoin) {
     }
 
     // Update the chart data
-    console.log('Detected Frequencies Data:', detectedFreqData);
-    console.log('Non-Matching Frequencies Data:', nonMatchingFreqData);
-    console.log('Coin Range Data:', coinRangeData);
     chart.data.datasets[0].data = detectedFreqData;
     chart.data.datasets[1].data = nonMatchingFreqData;
     chart.data.datasets[3].data = coinRangeData;
