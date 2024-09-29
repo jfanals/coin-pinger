@@ -85,6 +85,31 @@
         <button id="resetSettingsButton">Reset Settings</button>
     </div>
 
+    <div class="coin-management">
+        <h2>Manage Known Coins</h2>
+        <div>
+            <label for="coinName">Coin Name:</label>
+            <input type="text" id="coinName">
+            <button id="addCoinButton">Add Coin</button>
+        </div>
+        <div>
+            <label for="coinList">Select Coin:</label>
+            <select id="coinList"></select>
+            <button id="deleteCoinButton">Delete Coin</button>
+        </div>
+        <div>
+            <label for="frequencyValue">Frequency (Hz):</label>
+            <input type="number" id="frequencyValue">
+            <label for="tolerancePercent">Tolerance (%):</label>
+            <input type="number" id="tolerancePercent">
+            <button id="addFrequencyButton">Add Frequency</button>
+        </div>
+        <div>
+            <h3>Frequencies for Selected Coin</h3>
+            <ul id="frequencyList"></ul>
+        </div>
+    </div>
+
     <!-- Include Chart.js library -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     

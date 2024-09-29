@@ -1,23 +1,3 @@
-// Coin Database
-const knownCoins = [
-    { 
-        name: "Sovereign", 
-        frequencies: [
-            { value: 5600, tolerancePercent: 5 },
-            { value: 12700, tolerancePercent: 5 }
-        ]
-    },
-    { 
-        name: "Krugerrand", 
-        frequencies: [
-            { value: 4900, tolerancePercent: 5 },
-            { value: 10915, tolerancePercent: 5 },
-            { value: 18500, tolerancePercent: 5 }
-        ]
-    },
-    // Add more coins here as needed
-];
-
 // UI Elements
 const startButton = document.getElementById('startButton');
 const stopButton = document.getElementById('stopButton');
@@ -466,3 +446,116 @@ function highlightFrequencies(frequencies, matchingFrequencies, guessedCoin) {
     // Update the chart without animation
     chart.update('none');
 }
+
+// Default known coins
+const defaultKnownCoins = [
+    { 
+        name: "Sovereign", 
+        frequencies: [
+            { value: 5600, tolerancePercent: 5 },
+            { value: 12700, tolerancePercent: 5 }
+        ]
+    },
+    { 
+        name: "Krugerrand", 
+        frequencies: [
+            { value: 4900, tolerancePercent: 5 },
+            { value: 10915, tolerancePercent: 5 },
+            { value: 18500, tolerancePercent: 5 }
+        ]
+    }
+];
+
+// Load coin database from local storage
+function loadCoinDatabase() {
+    const storedCoins = localStorage.getItem('knownCoins');
+    if (storedCoins) {
+        return JSON.parse(storedCoins);
+    } else {
+        // Pre-populate with default known coins if local storage is empty
+        saveCoinDatabase(defaultKnownCoins);
+        return defaultKnownCoins;
+    }
+}
+
+// Save coin database to local storage
+function saveCoinDatabase(coins) {
+    localStorage.setItem('knownCoins', JSON.stringify(coins));
+}
+
+// Initialize coin database
+let knownCoins = loadCoinDatabase();
+
+// Update coin list in the UI
+function updateCoinList() {
+    const coinList = document.getElementById('coinList');
+    coinList.innerHTML = '';
+    knownCoins.forEach((coin, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = coin.name;
+        coinList.appendChild(option);
+    });
+}
+
+// Add a new coin
+function addCoin() {
+    const coinName = document.getElementById('coinName').value.trim();
+    if (coinName) {
+        knownCoins.push({ name: coinName, frequencies: [] });
+        saveCoinDatabase(knownCoins);
+        updateCoinList();
+        document.getElementById('coinName').value = '';
+    }
+}
+
+// Delete a selected coin
+function deleteCoin() {
+    const coinList = document.getElementById('coinList');
+    const selectedIndex = coinList.selectedIndex;
+    if (selectedIndex !== -1) {
+        knownCoins.splice(selectedIndex, 1);
+        saveCoinDatabase(knownCoins);
+        updateCoinList();
+        document.getElementById('frequencyList').innerHTML = '';
+    }
+}
+
+// Add a frequency to the selected coin
+function addFrequency() {
+    const coinList = document.getElementById('coinList');
+    const selectedIndex = coinList.selectedIndex;
+    if (selectedIndex !== -1) {
+        const frequencyValue = parseFloat(document.getElementById('frequencyValue').value);
+        const tolerancePercent = parseFloat(document.getElementById('tolerancePercent').value);
+        if (!isNaN(frequencyValue) && !isNaN(tolerancePercent)) {
+            knownCoins[selectedIndex].frequencies.push({ value: frequencyValue, tolerancePercent });
+            saveCoinDatabase(knownCoins);
+            updateFrequencyList(selectedIndex);
+            document.getElementById('frequencyValue').value = '';
+            document.getElementById('tolerancePercent').value = '';
+        }
+    }
+}
+
+// Update frequency list for the selected coin
+function updateFrequencyList(index) {
+    const frequencyList = document.getElementById('frequencyList');
+    frequencyList.innerHTML = '';
+    knownCoins[index].frequencies.forEach(freq => {
+        const li = document.createElement('li');
+        li.textContent = `Frequency: ${freq.value} Hz, Tolerance: ${freq.tolerancePercent}%`;
+        frequencyList.appendChild(li);
+    });
+}
+
+// Event listeners for coin management
+document.getElementById('addCoinButton').addEventListener('click', addCoin);
+document.getElementById('deleteCoinButton').addEventListener('click', deleteCoin);
+document.getElementById('addFrequencyButton').addEventListener('click', addFrequency);
+document.getElementById('coinList').addEventListener('change', (e) => {
+    updateFrequencyList(e.target.selectedIndex);
+});
+
+// Initialize coin list on page load
+updateCoinList();
