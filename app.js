@@ -42,12 +42,6 @@ const chart = new Chart(ctx, {
     data: {
         labels: [], // Frequencies
         datasets: [{
-            label: 'Amplitude',
-            data: [], // Amplitudes
-            backgroundColor: 'rgba(0, 123, 255, 0.5)',
-            barPercentage: 50,
-            // categoryPercentage: 0.8
-        }, {
             label: 'Detected Frequencies',
             data: [],
             type: 'bar',
@@ -56,6 +50,12 @@ const chart = new Chart(ctx, {
             borderWidth: 2,
             barPercentage: 50,
             // categoryPercentage: 1,
+        }, {
+            label: 'Amplitude',
+            data: [], // Amplitudes
+            backgroundColor: 'rgba(0, 123, 255, 0.5)',
+            barPercentage: 50,
+            // categoryPercentage: 0.8
         }]
     },
     options: {
@@ -156,7 +156,7 @@ function stopAnalysis() {
     if (audioContext) {
         audioContext.close();
     }
-    chart.data.datasets[1].data = []; // Clear detected frequencies
+    chart.data.datasets[0].data = []; // Clear detected frequencies
     chart.update();
 }
 
@@ -188,6 +188,7 @@ function detectPing() {
 
     // Simple threshold for detecting a ping
     if (average > 0.7 && !pingDetected && !cooldown) {
+        chart.data.datasets[0].data = [];
         console.log('Ping detected');
         pingDetected = true;
         statusIndicator.textContent = 'Status: Ping Detected - Processing...';
@@ -230,9 +231,9 @@ function processPing() {
         // Cooldown period
         setTimeout(() => {
             cooldown = false;
-        }, 1000); // 1 second cooldown
+        }, 2000); // 1 second cooldown
 
-    }, 500); // Wait 0.5 seconds to collect the sound
+    }, 750); // Wait 0.5 seconds to collect the sound
 }
 
 // Function to get significant frequencies using peak detection
@@ -335,7 +336,7 @@ function updateChart() {
     }
 
     chart.data.labels = filteredLabels;
-    chart.data.datasets[0].data = filteredData;
+    chart.data.datasets[1].data = filteredData;
     chart.update();
 }
 
@@ -357,7 +358,8 @@ function highlightFrequencies(frequencies) {
     });
 
     // Update the chart data
-    chart.data.datasets[1].data = detectedFreqData;
+    console.log('Detected Frequencies Data:', detectedFreqData);
+    chart.data.datasets[0].data = detectedFreqData;
 
     // Update the chart without animation
     chart.update('none');
