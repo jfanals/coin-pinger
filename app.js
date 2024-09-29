@@ -112,6 +112,59 @@ const chart = new Chart(ctx, {
 startButton.addEventListener('click', startAnalysis);
 stopButton.addEventListener('click', stopAnalysis);
 
+// Load settings from local storage
+function loadSettings() {
+    const xScale = localStorage.getItem('xScale') || 'linear';
+    const pingTimeout = localStorage.getItem('pingTimeout') || 200;
+
+    document.getElementById('xScale').value = xScale;
+    document.getElementById('pingTimeout').value = pingTimeout;
+
+    return { xScale, pingTimeout };
+}
+
+// Save settings to local storage
+function saveSettings() {
+    const xScale = document.getElementById('xScale').value;
+    const pingTimeout = document.getElementById('pingTimeout').value;
+
+    localStorage.setItem('xScale', xScale);
+    localStorage.setItem('pingTimeout', pingTimeout);
+}
+
+// Reset settings to default values
+function resetSettings() {
+    localStorage.setItem('xScale', 'linear');
+    localStorage.setItem('pingTimeout', 200);
+
+    document.getElementById('xScale').value = 'linear';
+    document.getElementById('pingTimeout').value = 200;
+
+    updateChartOptions('linear');
+    alert('Settings reset to default values!');
+}
+
+// Update chart options based on settings
+function updateChartOptions(xScale) {
+    chart.options.scales.x.type = xScale;
+    chart.update();
+}
+
+// Event listeners for settings inputs
+document.getElementById('xScale').addEventListener('change', () => {
+    saveSettings();
+    updateChartOptions(document.getElementById('xScale').value);
+});
+
+document.getElementById('pingTimeout').addEventListener('input', saveSettings);
+
+// Event listener for reset settings button
+document.getElementById('resetSettingsButton').addEventListener('click', resetSettings);
+
+// Load settings and apply them
+const { xScale, pingTimeout } = loadSettings();
+updateChartOptions(xScale);
+
 // Start Analysis Function
 function startAnalysis() {
     startButton.disabled = true;
@@ -138,7 +191,7 @@ function startAnalysis() {
             initializeChartLabels();
             statusIndicator.textContent = 'Status: Listening...';
             statusIndicator.style.color = 'green';
-            detectPing();
+            detectPing(pingTimeout);
         })
         .catch(err => {
             console.error('Error accessing microphone', err);
@@ -191,7 +244,7 @@ function initializeChartLabels() {
 let coolingPing = 0;
 
 // Ping Detection and Analysis
-function detectPing() {
+function detectPing(pingTimeout) {
     analyser.getByteFrequencyData(frequencyDataArray);
     let pingDetected = false;
     let maxAmplitude = 0;
@@ -211,7 +264,7 @@ function detectPing() {
         coolingPing = maxAmplitude;
         statusIndicator.textContent = 'Status: Ping Detected - Processing...';
         statusIndicator.style.color = 'orange';
-        processPing();
+        processPing(pingTimeout);
     }
 
     // Decay the coolingPing value over time
@@ -220,11 +273,11 @@ function detectPing() {
     // Update the chart
     updateChart();
 
-    animationId = requestAnimationFrame(detectPing);
+    animationId = requestAnimationFrame(() => detectPing(pingTimeout));
 }
 
 // Function to process the detected ping
-function processPing() {
+function processPing(pingTimeout) {
     // Brief cooldown to collect the entire sound event
     setTimeout(() => {
         analyser.getByteFrequencyData(frequencyDataArray);
@@ -246,7 +299,7 @@ function processPing() {
         statusIndicator.textContent = 'Status: Listening...';
         statusIndicator.style.color = 'green';
 
-    }, 200); // Wait 0.2 seconds to collect the sound
+    }, pingTimeout); // Use the user-defined timeout
 }
 
 // Function to get significant frequencies using peak detection

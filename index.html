@@ -43,6 +43,9 @@
             margin: 5px;
             font-size: 16px;
         }
+        .settings {
+            margin: 20px 0;
+        }
     </style>
 </head>
 <body>
@@ -66,6 +69,20 @@
                 <!-- Log entries will be appended here -->
             </tbody>
         </table>
+    </div>
+
+    <div class="settings">
+        <h2>Settings</h2>
+        <label for="xScale">X-Axis Scale:</label>
+        <select id="xScale">
+            <option value="linear">Linear</option>
+            <option value="logarithmic">Logarithmic</option>
+        </select>
+        <br>
+        <label for="pingTimeout">Ping Processing Timeout (ms):</label>
+        <input type="number" id="pingTimeout" value="200">
+        <br>
+        <button id="resetSettingsButton">Reset Settings</button>
     </div>
 
     <!-- Include Chart.js library -->
