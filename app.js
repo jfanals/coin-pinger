@@ -11,7 +11,7 @@ const knownCoins = [
         name: "Krugerrand", 
         frequencies: [
             { value: 4900, tolerancePercent: 5 },
-            { value: 10750, tolerancePercent: 3 },
+            { value: 10915, tolerancePercent: 3 },
             { value: 18500, tolerancePercent: 3 }
         ]
     },
@@ -246,7 +246,7 @@ function processPing() {
             cooldown = false;
         }, 2000); // 1 second cooldown
 
-    }, 750); // Wait 0.5 seconds to collect the sound
+    }, 400); // Wait 0.5 seconds to collect the sound
 }
 
 // Function to get significant frequencies using peak detection
