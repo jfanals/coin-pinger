@@ -1,0 +1,64 @@
+Project Prompt: Gold Coin Ring Analyzer
+
+You are tasked with creating a web-based "Gold Coin Ring Analyzer" that detects coin pings (the sound made when a coin is struck) using a microphone. The project involves capturing audio, analyzing its frequency spectrum, and identifying the main frequencies corresponding to specific coin types.
+
+Key Features:
+Audio Analysis:
+
+Use the Web Audio API to capture audio from the user's microphone.
+Detect "pings" or significant sound events in the audio data.
+After detecting a ping, and a brief cooldown period, perform a Fast Fourier Transform (FFT) on the collected audio data to extract key frequencies.
+Frequency Detection:
+
+Implement an algorithm to identify significant frequencies after the ping. Group similar frequencies and identify the top 5 most prominent ones.
+Compare the detected frequencies against predefined frequency ranges for known gold coins (e.g., Sovereign, Krugerrand) to make a best guess about the coin.
+User Interface (UI):
+
+A simple web interface where the user can start/stop the analysis and view the results.
+A visual frequency spectrum is displayed in real-time using Chart.js.
+Detected frequencies and the best guess of the coin are displayed, along with a detection log that stores the last 10 pings.
+Ping Event Handling:
+
+After a ping, collect the audio data, and after a brief cooldown period, perform frequency analysis on the entire collected sound event.
+Update the detection log with each ping, displaying the time, detected frequencies, and the guessed coin.
+Technical Requirements:
+HTML/JavaScript Setup:
+
+Use the Web Audio API for real-time audio capture and frequency analysis.
+Utilize Chart.js for plotting the frequency spectrum in real-time.
+Implement frequency detection and FFT analysis using a JavaScript DSP library (e.g., dsp.js).
+Coin Identification Algorithm:
+
+The algorithm should match detected frequencies against predefined ranges for different coins.
+Known coins should have a tolerance level to account for slight variations in frequency.
+Key Components:
+app.js: JavaScript file responsible for:
+Audio processing (capturing, detecting pings, analyzing frequencies).
+Managing the UI (start/stop buttons, results, and log display).
+Performing frequency analysis using FFT.
+index.html: HTML file that includes:
+A button to start/stop the analysis.
+A canvas element for displaying the frequency spectrum.
+A detection log to display recent ping results (time, frequencies, guessed coin).
+Coin Database: An array of known coins and their expected frequency ranges (e.g., Sovereign, Krugerrand), along with tolerance percentages for matching frequencies.
+
+const knownCoins = [
+    { 
+        name: "Sovereign", 
+        frequencyRanges: [
+            { min: 5450, max: 5650 },
+            { min: 12200, max: 12800 }
+        ],
+        tolerancePercent: 3
+    },
+    { 
+        name: "Krugerrand", 
+        frequencyRanges: [
+            { min: 4900, max: 5000 },
+            { min: 10500, max: 11000 },
+            { min: 18500, max: 19000 },
+        ],
+        tolerancePercent: 3
+    },
+    // Add more coins here as needed
+];
