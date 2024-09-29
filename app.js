@@ -45,8 +45,8 @@ const chart = new Chart(ctx, {
             label: 'Amplitude',
             data: [], // Amplitudes
             backgroundColor: 'rgba(0, 123, 255, 0.5)',
-            barPercentage: 1,
-            categoryPercentage: 0.8
+            barPercentage: 50,
+            // categoryPercentage: 0.8
         }, {
             label: 'Detected Frequencies',
             data: [],
@@ -54,8 +54,8 @@ const chart = new Chart(ctx, {
             backgroundColor: 'rgba(255, 0, 0, 0.7)', // Semi-transparent red
             borderColor: 'rgba(255, 0, 0, 1)', // Solid red border
             borderWidth: 2,
-            barPercentage: 0.5,
-            categoryPercentage: 1,
+            barPercentage: 50,
+            // categoryPercentage: 1,
         }]
     },
     options: {
