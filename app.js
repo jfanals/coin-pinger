@@ -66,10 +66,9 @@ const chart = new Chart(ctx, {
             label: 'Detected Coin Range',
             data: [],
             type: 'bar',
-            backgroundColor: 'rgba(0, 255, 0, 0.05)', // Semi-transparent light green
-            borderColor: 'rgba(0, 255, 0, 0.05)', // Solid light green border
-            borderWidth: 2,
-            barPercentage: 50,
+            backgroundColor: 'rgba(0, 255, 0, 0.25)', // Semi-transparent light green
+            borderColor: 'rgba(0, 255, 0, 0.25)', // Solid light green border
+            barPercentage: 1,
         }]
     },
     options: {
@@ -86,7 +85,7 @@ const chart = new Chart(ctx, {
                 ticks: {
                     stepSize: 1000
                 },
-                stacked: false
+                stacked: true
             },
             y: {
                 beginAtZero: true,
