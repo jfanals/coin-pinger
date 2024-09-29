@@ -187,29 +187,35 @@ function initializeChartLabels() {
     chart.data.labels = labels;
 }
 
-// Ping Detection and Analysis
-let pingDetected = false;
-let cooldown = false;
+// New variable to store the highest detected amplitude during cooldown
+let coolingPing = 0;
 
+// Ping Detection and Analysis
 function detectPing() {
     analyser.getByteFrequencyData(frequencyDataArray);
     let pingDetected = false;
+    let maxAmplitude = 0;
 
-    // Check if any frequency has an amplitude above 100
+    // Check if any frequency has an amplitude above 100 and find the max amplitude
     for (let i = 0; i < frequencyDataArray.length; i++) {
         if (frequencyDataArray[i] > 100) {
             pingDetected = true;
-            break;
+            if (frequencyDataArray[i] > maxAmplitude) {
+                maxAmplitude = frequencyDataArray[i];
+            }
         }
     }
 
-    if (pingDetected && !cooldown) {
-        cooldown = true;
-        chart.data.datasets[0].data = [];
+    // Update coolingPing with the highest detected amplitude
+    if (pingDetected && (maxAmplitude - 100) > coolingPing) {
+        coolingPing = maxAmplitude;
         statusIndicator.textContent = 'Status: Ping Detected - Processing...';
         statusIndicator.style.color = 'orange';
         processPing();
     }
+
+    // Decay the coolingPing value over time
+    coolingPing = Math.max(0, coolingPing - 1); // Adjust the decay rate as needed
 
     // Update the chart
     updateChart();
@@ -217,6 +223,7 @@ function detectPing() {
     animationId = requestAnimationFrame(detectPing);
 }
 
+// Function to process the detected ping
 function processPing() {
     // Brief cooldown to collect the entire sound event
     setTimeout(() => {
@@ -224,7 +231,6 @@ function processPing() {
 
         // Extract frequencies
         const frequencies = getFrequencies(frequencyDataArray);
-
 
         // Identify Coin
         const { name: guessedCoin, matchingFrequencies, confidence } = identifyCoin(frequencies);
@@ -240,12 +246,7 @@ function processPing() {
         statusIndicator.textContent = 'Status: Listening...';
         statusIndicator.style.color = 'green';
 
-        // Cooldown period
-        setTimeout(() => {
-            cooldown = false;
-        }, 1000); // 1 second cooldown
-
-    }, 200); // Wait 0.5 seconds to collect the sound
+    }, 200); // Wait 0.2 seconds to collect the sound
 }
 
 // Function to get significant frequencies using peak detection
