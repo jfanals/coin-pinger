@@ -542,11 +542,22 @@ function addFrequency() {
 function updateFrequencyList(index) {
     const frequencyList = document.getElementById('frequencyList');
     frequencyList.innerHTML = '';
-    knownCoins[index].frequencies.forEach(freq => {
-        const li = document.createElement('li');
-        li.textContent = `Frequency: ${freq.value} Hz, Tolerance: ${freq.tolerancePercent}%`;
-        frequencyList.appendChild(li);
+    knownCoins[index].frequencies.forEach((freq, freqIndex) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${freq.value}</td>
+            <td>${freq.tolerancePercent}</td>
+            <td><button onclick="deleteFrequency(${index}, ${freqIndex})">Delete</button></td>
+        `;
+        frequencyList.appendChild(row);
     });
+}
+
+// Delete a frequency from the selected coin
+function deleteFrequency(coinIndex, freqIndex) {
+    knownCoins[coinIndex].frequencies.splice(freqIndex, 1);
+    saveCoinDatabase(knownCoins);
+    updateFrequencyList(coinIndex);
 }
 
 // Event listeners for coin management
@@ -559,3 +570,24 @@ document.getElementById('coinList').addEventListener('change', (e) => {
 
 // Initialize coin list on page load
 updateCoinList();
+
+document.addEventListener("DOMContentLoaded", function() {
+    const canvas = document.getElementById('myCanvas');
+    const context = canvas.getContext('2d');
+
+    function resizeCanvas() {
+        const aspectRatio = window.innerWidth / window.innerHeight;
+        if (aspectRatio > 1) {
+            // Landscape mode
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        } else {
+            // Portrait mode
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+});

@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gold Coin Ring Analyzer</title>
     <style>
         body {
@@ -43,8 +44,31 @@
             margin: 5px;
             font-size: 16px;
         }
-        .settings {
+        .settings, .coin-management {
             margin: 20px 0;
+            text-align: left;
+            max-width: 90%;
+            margin: 20px auto;
+        }
+        .settings table, .coin-management table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .settings th, .settings td, .coin-management th, .coin-management td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        .settings th, .coin-management th {
+            background-color: #f2f2f2;
+        }
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+        canvas {
+            display: block; /* Prevent scrollbars */
+            width: 100%;
+            height: 100%;
         }
     </style>
 </head>
@@ -73,40 +97,61 @@
 
     <div class="settings">
         <h2>Settings</h2>
-        <label for="xScale">X-Axis Scale:</label>
-        <select id="xScale">
-            <option value="linear">Linear</option>
-            <option value="logarithmic">Logarithmic</option>
-        </select>
-        <br>
-        <label for="pingTimeout">Ping Processing Timeout (ms):</label>
-        <input type="number" id="pingTimeout" value="200">
-        <br>
-        <button id="resetSettingsButton">Reset Settings</button>
+        <table>
+            <tr>
+                <td><label for="xScale">X-Axis Scale:</label></td>
+                <td>
+                    <select id="xScale">
+                        <option value="linear">Linear</option>
+                        <option value="logarithmic">Logarithmic</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td><label for="pingTimeout">Ping Processing Timeout (ms):</label></td>
+                <td><input type="number" id="pingTimeout" value="200"></td>
+            </tr>
+            <tr>
+                <td colspan="2"><button id="resetSettingsButton">Reset Settings</button></td>
+            </tr>
+        </table>
     </div>
 
     <div class="coin-management">
         <h2>Manage Known Coins</h2>
-        <div>
-            <label for="coinName">Coin Name:</label>
-            <input type="text" id="coinName">
-            <button id="addCoinButton">Add Coin</button>
-        </div>
-        <div>
-            <label for="coinList">Select Coin:</label>
-            <select id="coinList"></select>
-            <button id="deleteCoinButton">Delete Coin</button>
-        </div>
-        <div>
-            <label for="frequencyValue">Frequency (Hz):</label>
-            <input type="number" id="frequencyValue">
-            <label for="tolerancePercent">Tolerance (%):</label>
-            <input type="number" id="tolerancePercent">
-            <button id="addFrequencyButton">Add Frequency</button>
-        </div>
+        <table>
+            <tr>
+                <td><label for="coinName">Coin Name:</label></td>
+                <td><input type="text" id="coinName"></td>
+                <td><button id="addCoinButton">Add Coin</button></td>
+            </tr>
+            <tr>
+                <td><label for="coinList">Select Coin:</label></td>
+                <td><select id="coinList"></select></td>
+                <td><button id="deleteCoinButton">Delete Coin</button></td>
+            </tr>
+            <tr>
+                <td><label for="frequencyValue">Frequency (Hz):</label></td>
+                <td><input type="number" id="frequencyValue"></td>
+                <td><label for="tolerancePercent">Tolerance (%):</label></td>
+                <td><input type="number" id="tolerancePercent"></td>
+                <td><button id="addFrequencyButton">Add Frequency</button></td>
+            </tr>
+        </table>
         <div>
             <h3>Frequencies for Selected Coin</h3>
-            <ul id="frequencyList"></ul>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Frequency (Hz)</th>
+                        <th>Tolerance (%)</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="frequencyList">
+                    <!-- Frequencies will be appended here -->
+                </tbody>
+            </table>
         </div>
     </div>
 
