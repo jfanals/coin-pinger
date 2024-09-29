@@ -115,7 +115,7 @@ stopButton.addEventListener('click', stopAnalysis);
 // Load settings from local storage
 function loadSettings() {
     const xScale = localStorage.getItem('xScale') || 'linear';
-    const pingTimeout = localStorage.getItem('pingTimeout') || 200;
+    const pingTimeout = localStorage.getItem('pingTimeout') || 10;
 
     document.getElementById('xScale').value = xScale;
     document.getElementById('pingTimeout').value = pingTimeout;
@@ -289,6 +289,7 @@ function processPing(pingTimeout) {
         const { name: guessedCoin, matchingFrequencies, confidence } = identifyCoin(frequencies);
 
         // Update Log
+        console.log('updating log');
         updateLog(frequencies, guessedCoin, confidence);
 
         // Highlight detected frequencies on the chart
