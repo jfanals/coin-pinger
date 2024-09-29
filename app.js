@@ -2,20 +2,18 @@
 const knownCoins = [
     { 
         name: "Sovereign", 
-        frequencyRanges: [
-            { min: 5450, max: 5650 },
-            { min: 12200, max: 12800 }
-        ],
-        tolerancePercent: 3
+        frequencies: [
+            { value: 5500, tolerancePercent: 5 },
+            { value: 12500, tolerancePercent: 3 }
+        ]
     },
     { 
         name: "Krugerrand", 
-        frequencyRanges: [
-            { min: 4800, max: 5000 },
-            { min: 10500, max: 11000 },
-            { min: 18500, max: 19000 },
-        ],
-        tolerancePercent: 3
+        frequencies: [
+            { value: 4900, tolerancePercent: 5 },
+            { value: 10750, tolerancePercent: 3 },
+            { value: 18500, tolerancePercent: 3 }
+        ]
     },
     // Add more coins here as needed
 ];
@@ -292,15 +290,15 @@ function identifyCoin(frequencies) {
     for (let coin of knownCoins) {
         let matchCount = 0;
         let matchingFrequencies = [];
-        let totalRanges = coin.frequencyRanges.length;
+        let totalFrequencies = coin.frequencies.length;
 
-        // Iterate through the coin's frequency ranges
-        for (let range of coin.frequencyRanges) {
-            const tolerance = (range.max - range.min) * (coin.tolerancePercent / 100);
-            const adjustedMin = range.min - tolerance;
-            const adjustedMax = range.max + tolerance;
+        // Iterate through the coin's frequencies
+        for (let freqObj of coin.frequencies) {
+            const tolerance = freqObj.value * (freqObj.tolerancePercent / 100);
+            const adjustedMin = freqObj.value - tolerance;
+            const adjustedMax = freqObj.value + tolerance;
 
-            // Check if any of the detected frequencies fall within the tolerance range for this range
+            // Check if any of the detected frequencies fall within the tolerance range for this frequency
             const isInRange = frequencies.some(freq => {
                 const inRange = freq.frequency >= adjustedMin && freq.frequency <= adjustedMax;
                 if (inRange) {
@@ -314,8 +312,8 @@ function identifyCoin(frequencies) {
             }
         }
 
-        // Calculate confidence as the ratio of matched ranges to total ranges
-        const confidence = (matchCount / totalRanges) * 100;
+        // Calculate confidence as the ratio of matched frequencies to total frequencies
+        const confidence = (matchCount / totalFrequencies) * 100;
 
         // If this coin has a higher confidence than the current best match, update the best match
         if (confidence > bestMatch.confidence) {
@@ -392,13 +390,13 @@ function highlightFrequencies(frequencies, matchingFrequencies, guessedCoin) {
         }
     });
 
-    // Highlight the detected coin's frequency range
+    // Highlight the detected coin's frequencies
     const detectedCoin = knownCoins.find(coin => coin.name === guessedCoin);
     if (detectedCoin) {
-        detectedCoin.frequencyRanges.forEach(range => {
-            const tolerance = (range.max - range.min) * (detectedCoin.tolerancePercent / 100);
-            const adjustedMin = range.min - tolerance;
-            const adjustedMax = range.max + tolerance;
+        detectedCoin.frequencies.forEach(freqObj => {
+            const tolerance = freqObj.value * (freqObj.tolerancePercent / 100);
+            const adjustedMin = freqObj.value - tolerance;
+            const adjustedMax = freqObj.value + tolerance;
             chart.data.labels.forEach((label, index) => {
                 const freq = parseFloat(label);
                 if (freq >= adjustedMin && freq <= adjustedMax) {
